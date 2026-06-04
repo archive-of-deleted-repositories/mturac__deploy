@@ -1,0 +1,16 @@
+{
+  "name": "deploy",
+  "description": "Deploy to Vercel, Railway, Fly.io, and Render directly from Claude Code. Auto-detects your framework, runs preflight checks, and handles preview and production deployments with rollback safety.",
+  "author": {
+    "name": "mturac",
+    "url": "https://github.com/mturac"
+  },
+  "repository": {
+    "type": "github",
+    "url": "https://github.com/mturac/deploy",
+    "branch": "main"
+  },
+  "keywords": ["deploy", "vercel", "railway", "fly.io", "render", "deployment", "ci/cd", "devops"],
+  "categories": ["deployment", "devops"],
+  "version": "0.1.0"
+}

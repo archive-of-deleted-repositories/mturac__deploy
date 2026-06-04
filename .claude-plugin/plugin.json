@@ -1,0 +1,23 @@
+{
+  "name": "deploy",
+  "description": "Deploy to Vercel, Railway, Fly.io, and Render directly from Claude Code. Detects your framework, runs preflight checks, and handles preview and production deployments.",
+  "version": "0.1.0",
+  "author": {
+    "name": "mturac"
+  },
+  "skills": [
+    "skills/detect-platform",
+    "skills/deploy-vercel",
+    "skills/deploy-railway",
+    "skills/deploy-fly",
+    "skills/deploy-render",
+    "skills/deploy-rollback"
+  ],
+  "commands": [
+    "commands/deploy.md",
+    "commands/deploy-preview.md",
+    "commands/deploy-production.md",
+    "commands/deploy-rollback.md",
+    "commands/deploy-status.md"
+  ]
+}
