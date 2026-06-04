@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>deploy — Claude Code Plugin</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwindcss.config = { darkMode: 'class' }</script>
+<style>
+* { -webkit-font-smoothing: antialiased; }
+.gradient-text { background: linear-gradient(135deg, #6366f1, #a78bfa, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.card:hover { transform: translateY(-2px); }
+.dark .card:hover { box-shadow: 0 8px 30px rgba(0,0,0,0.5); }
+.status-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+.status-dot.ok { background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,0.5); }
+.status-dot.off { background: #52525b; }
+.deploy-btn { background: linear-gradient(135deg, #6366f1, #7c3aed); transition: opacity 0.2s; }
+.deploy-btn:hover { opacity: 0.85; box-shadow: 0 0 20px rgba(99,102,241,0.35); }
+@keyframes fadeUp { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform: translateY(0); } }
+.fade-up { animation: fadeUp 0.5s ease-out forwards; }
+.s1{animation-delay:.05s} .s2{animation-delay:.1s} .s3{animation-delay:.15s} .s4{animation-delay:.2s} .s5{animation-delay:.25s} .s6{animation-delay:.3s}
+::-webkit-scrollbar{width:5px} ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:3px}
+.toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%); background: #6366f1; color: white; padding: 10px 22px; border-radius: 10px; font-size: 14px; font-weight: 500; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 100; }
+.toast.show { opacity: 1; }
+</style>
+</head>
+<body class="dark:bg-zinc-950 bg-zinc-50 min-h-screen font-sans transition-colors duration-300">
+
+<div class="fixed inset-0 pointer-events-none">
+  <div class="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/5 rounded-full blur-3xl"></div>
+  <div class="absolute bottom-1/3 right-1/4 w-80 h-80 bg-purple-500/5 rounded-full blur-3xl"></div>
+</div>
+
+<div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 py-10 pb-20">
+
+  <!-- Header -->
+  <header class="flex items-center justify-between mb-14 fade-up" style="opacity:0">
+    <div class="flex items-center gap-4">
+      <div class="relative">
+        <div class="w-12 h-12 rounded-xl deploy-btn flex items-center justify-center shadow-lg shadow-indigo-500/20">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+            <line x1="4" y1="22" x2="4" y2="15"/>
+          </svg>
+        </div>
+        <div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 rounded-full border-2 dark:border-zinc-950 border-zinc-50"></div>
+      </div>
+      <div>
+        <h1 class="text-2xl font-bold tracking-tight"><span class="gradient-text">deploy</span></h1>
+        <p class="text-sm dark:text-zinc-500 text-zinc-400 mt-0.5">Claude Code Plugin</p>
+      </div>
+    </div>
+    <button onclick="toggleTheme()" class="p-2.5 rounded-xl dark:bg-zinc-800/70 bg-zinc-200 dark:text-zinc-400 text-zinc-500 hover:opacity-70 transition-opacity">
+      <svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </button>
+  </header>
+
+  <!-- Platforms -->
+  <section class="mb-12">
+    <div class="flex items-center gap-3 mb-5 fade-up s1" style="opacity:0">
+      <span class="text-xs font-semibold dark:text-zinc-500 text-zinc-400 uppercase tracking-widest">Platforms</span>
+      <div class="flex-1 h-px dark:bg-zinc-800 bg-zinc-200"></div>
+    </div>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <!-- Vercel -->
+      <div class="card rounded-2xl dark:bg-zinc-900/80 bg-white border dark:border-zinc-800/50 border-zinc-200 p-5 fade-up s1" style="opacity:0">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-10 h-10 rounded-xl bg-black dark:bg-zinc-800 flex items-center justify-center text-white text-lg font-bold">▲</div>
+          <span class="flex items-center gap-1.5 text-xs dark:text-green-400 text-green-600 font-medium"><span class="status-dot ok"></span>Ready</span>
+        </div>
+        <p class="font-semibold dark:text-white text-zinc-900 mb-1">Vercel</p>
+        <p class="text-xs dark:text-zinc-500 text-zinc-400 mb-4">Edge-first hosting</p>
+        <button onclick="copy('/deploy vercel', this)" class="w-full py-2 px-3 rounded-lg text-xs font-semibold text-white deploy-btn">Deploy →</button>
+      </div>
+      <!-- Railway -->
+      <div class="card rounded-2xl dark:bg-zinc-900/80 bg-white border dark:border-zinc-800/50 border-zinc-200 p-5 fade-up s2" style="opacity:0">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-10 h-10 rounded-xl bg-violet-600/20 flex items-center justify-center text-2xl">🚂</div>
+          <span class="flex items-center gap-1.5 text-xs dark:text-green-400 text-green-600 font-medium"><span class="status-dot ok"></span>Ready</span>
+        </div>
+        <p class="font-semibold dark:text-white text-zinc-900 mb-1">Railway</p>
+        <p class="text-xs dark:text-zinc-500 text-zinc-400 mb-4">Full-stack cloud</p>
+        <button onclick="copy('/deploy railway', this)" class="w-full py-2 px-3 rounded-lg text-xs font-semibold text-white deploy-btn">Deploy →</button>
+      </div>
+      <!-- Fly.io -->
+      <div class="card rounded-2xl dark:bg-zinc-900/80 bg-white border dark:border-zinc-800/50 border-zinc-200 p-5 fade-up s3" style="opacity:0">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-10 h-10 rounded-xl bg-purple-600/20 flex items-center justify-center text-2xl">🪰</div>
+          <span class="flex items-center gap-1.5 text-xs dark:text-zinc-400 text-zinc-500 font-medium"><span class="status-dot off"></span>Not configured</span>
+        </div>
+        <p class="font-semibold dark:text-white text-zinc-900 mb-1">Fly.io</p>
+        <p class="text-xs dark:text-zinc-500 text-zinc-400 mb-4">Global VMs</p>
+        <button onclick="copy('/deploy fly', this)" class="w-full py-2 px-3 rounded-lg text-xs font-semibold text-white deploy-btn">Deploy →</button>
+      </div>
+      <!-- Render -->
+      <div class="card rounded-2xl dark:bg-zinc-900/80 bg-white border dark:border-zinc-800/50 border-zinc-200 p-5 fade-up s4" style="opacity:0">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-10 h-10 rounded-xl bg-green-600/20 flex items-center justify-center text-2xl">🌿</div>
+          <span class="flex items-center gap-1.5 text-xs dark:text-zinc-400 text-zinc-500 font-medium"><span class="status-dot off"></span>Not configured</span>
+        </div>
+        <p class="font-semibold dark:text-white text-zinc-900 mb-1">Render</p>
+        <p class="text-xs dark:text-zinc-500 text-zinc-400 mb-4">Git-push deploys</p>
+        <button onclick="copy('/deploy render', this)" class="w-full py-2 px-3 rounded-lg text-xs font-semibold text-white deploy-btn">Deploy →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Framework Detection -->
+  <section class="mb-12 fade-up s3" style="opacity:0">
+    <div class="flex items-center gap-3 mb-5">
+      <span class="text-xs font-semibold dark:text-zinc-500 text-zinc-400 uppercase tracking-widest">Detected Framework</span>
+      <div class="flex-1 h-px dark:bg-zinc-800 bg-zinc-200"></div>
+    </div>
+    <div class="rounded-2xl dark:bg-zinc-900/80 bg-white border dark:border-zinc-800/50 border-zinc-200 p-6">
+      <div class="flex items-center justify-between mb-5">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-lg bg-black dark:bg-zinc-800 flex items-center justify-center text-white font-bold text-sm">N</div>
+          <div>
+            <p class="font-semibold dark:text-white text-zinc-900">Next.js 14</p>
+            <p class="text-xs dark:text-zinc-500 text-zinc-400">Detected from <code class="dark:text-indigo-400 text-indigo-600">package.json</code></p>
+          </div>
+        </div>
+        <span class="px-3 py-1 rounded-full text-xs font-semibold dark:bg-indigo-500/15 bg-indigo-50 dark:text-indigo-400 text-indigo-600 dark:border-indigo-500/20 border-indigo-200 border">Auto-detected</span>
+      </div>
+      <div class="grid grid-cols-3 gap-3">
+        <div class="rounded-xl dark:bg-zinc-800/50 bg-zinc-50 p-3">
+          <p class="text-xs dark:text-zinc-500 text-zinc-400 mb-1">Build Command</p>
+          <code class="text-xs dark:text-zinc-200 text-zinc-700 font-mono">npm run build</code>
+        </div>
+        <div class="rounded-xl dark:bg-zinc-800/50 bg-zinc-50 p-3">
+          <p class="text-xs dark:text-zinc-500 text-zinc-400 mb-1">Output Dir</p>
+          <code class="text-xs dark:text-zinc-200 text-zinc-700 font-mono">.next</code>
+        </div>
+        <div class="rounded-xl dark:bg-zinc-800/50 bg-zinc-50 p-3">
+          <p class="text-xs dark:text-zinc-500 text-zinc-400 mb-1">Package Manager</p>
+          <code class="text-xs dark:text-zinc-200 text-zinc-700 font-mono">npm</code>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Recent Deployments -->
+  <section class="mb-12 fade-up s4" style="opacity:0">
+    <div class="flex items-center gap-3 mb-5">
+      <span class="text-xs font-semibold dark:text-zinc-500 text-zinc-400 uppercase tracking-widest">Recent Deployments</span>
+      <div class="flex-1 h-px dark:bg-zinc-800 bg-zinc-200"></div>
+    </div>
+    <div class="rounded-2xl dark:bg-zinc-900/80 bg-white border dark:border-zinc-800/50 border-zinc-200 overflow-hidden">
+      <div id="deployments"></div>
+    </div>
+  </section>
+
+  <!-- Commands -->
+  <section class="fade-up s5" style="opacity:0">
+    <div class="flex items-center gap-3 mb-5">
+      <span class="text-xs font-semibold dark:text-zinc-500 text-zinc-400 uppercase tracking-widest">Commands</span>
+      <div class="flex-1 h-px dark:bg-zinc-800 bg-zinc-200"></div>
+      <span class="text-xs dark:text-zinc-600 text-zinc-400">Click to copy → paste in Claude</span>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div id="cmds"></div>
+    </div>
+  </section>
+
+</div>
+
+<div id="toast" class="toast">Copied to clipboard!</div>
+
+<script>
+const deployments = [
+  { status: 'success', msg: 'Production deploy', platform: 'Vercel', time: '2 min ago', url: 'https://my-app.vercel.app', branch: 'main' },
+  { status: 'success', msg: 'Preview deploy', platform: 'Vercel', time: '1 hr ago', url: 'https://my-app-abc123.vercel.app', branch: 'feat/new-ui' },
+  { status: 'error', msg: 'Build failed', platform: 'Railway', time: '3 hrs ago', url: null, branch: 'fix/auth' },
+  { status: 'success', msg: 'Production deploy', platform: 'Fly.io', time: '1 day ago', url: 'https://my-app.fly.dev', branch: 'main' },
+];
+
+const commands = [
+  { cmd: '/deploy', desc: 'Auto-detect platform and deploy preview' },
+  { cmd: '/deploy-preview', desc: 'Deploy a preview version' },
+  { cmd: '/deploy-production', desc: 'Deploy to production (requires confirmation)' },
+  { cmd: '/deploy-rollback', desc: 'Roll back to previous deployment' },
+  { cmd: '/deploy-status', desc: 'Check recent deployment status' },
+  { cmd: '/deploy vercel --prod', desc: 'Direct production deploy to Vercel' },
+];
+
+function renderDeployments() {
+  const el = document.getElementById('deployments');
+  el.innerHTML = deployments.map((d, i) => `
+    <div class="flex items-center justify-between px-5 py-4 ${i < deployments.length-1 ? 'border-b dark:border-zinc-800/50 border-zinc-100' : ''}">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center ${d.status==='success' ? 'dark:bg-green-500/15 bg-green-50 text-green-500' : 'dark:bg-red-500/15 bg-red-50 text-red-500'}">
+          ${d.status==='success' ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>' : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>'}
+        </div>
+        <div>
+          <p class="text-sm font-medium dark:text-zinc-200 text-zinc-700">${d.msg}</p>
+          <p class="text-xs dark:text-zinc-500 text-zinc-400">${d.platform} · <code class="font-mono">${d.branch}</code></p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3 text-right">
+        <span class="text-xs dark:text-zinc-500 text-zinc-400">${d.time}</span>
+        ${d.url ? `<a href="${d.url}" target="_blank" class="text-xs text-indigo-400 hover:text-indigo-300 transition-colors font-mono truncate max-w-32">↗ ${d.url.replace('https://','')}</a>` : '<span class="text-xs text-red-400">Build failed</span>'}
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderCommands() {
+  const el = document.getElementById('cmds');
+  el.innerHTML = commands.map(c => `
+    <div onclick="copy('${c.cmd}', this)" class="col-span-1 cursor-pointer rounded-xl dark:bg-zinc-900/80 bg-white border dark:border-zinc-800/50 border-zinc-200 px-4 py-3.5 hover:border-indigo-500/40 transition-all group">
+      <div class="flex items-center justify-between">
+        <code class="text-sm font-mono font-semibold dark:text-indigo-400 text-indigo-600">${c.cmd}</code>
+        <svg class="w-4 h-4 dark:text-zinc-600 text-zinc-400 group-hover:dark:text-zinc-400 group-hover:text-zinc-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+      </div>
+      <p class="text-xs dark:text-zinc-500 text-zinc-400 mt-1">${c.desc}</p>
+    </div>
+  `).join('');
+}
+
+function copy(text, el) {
+  navigator.clipboard.writeText(text).catch(() => {});
+  const toast = document.getElementById('toast');
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+function toggleTheme() {
+  const html = document.documentElement;
+  html.classList.toggle('dark');
+  const icon = document.getElementById('themeIcon');
+  if (html.classList.contains('dark')) {
+    icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+  } else {
+    icon.innerHTML = '<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>';
+  }
+}
+
+renderDeployments();
+renderCommands();
+</script>
+</body>
+</html>
