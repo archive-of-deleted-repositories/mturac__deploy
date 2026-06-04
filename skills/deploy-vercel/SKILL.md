@@ -128,8 +128,20 @@ vercel logs <deployment-url>
 
 ---
 
+## Retry & Error Recovery
+
+If a deploy command fails with a transient error (network timeout, rate limit, temporary API error):
+
+1. Wait 10 seconds, retry once automatically
+2. If second attempt fails, wait 30 seconds, retry a third time
+3. If three attempts fail, surface the error and ask user to check: internet connection, Vercel API status (vercel.com/status), and CLI version (`vercel --version`)
+
+**Transient errors** (retry): `ECONNRESET`, `ECONNREFUSED`, `ETIMEDOUT`, HTTP 429, HTTP 503  
+**Permanent errors** (don't retry): HTTP 401 (auth), HTTP 403 (permissions), build script failures
+
 ## Guardrails
 
 - Never run `vercel --prod` without user confirmation after preview review
 - If `.vercel/` is gitignored, remind user to set up project on each new machine
 - Warn if sensitive values are in `.env` files that might be committed to git
+- Never store or log API tokens — use `vercel env` for all secrets

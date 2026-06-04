@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate plugin.json
+        run: |
+          node -e "
+            const p = require('./.claude-plugin/plugin.json');
+            if (!p.name) throw new Error('Missing name');
+            if (!p.description) throw new Error('Missing description');
+            if (!p.version) throw new Error('Missing version');
+            console.log('plugin.json valid:', p.name, p.version);
+          "
+
+      - name: Check skill files exist
+        run: |
+          for skill in detect-platform deploy-vercel deploy-railway deploy-fly deploy-render deploy-rollback; do
+            if [ ! -f "skills/$skill/SKILL.md" ]; then
+              echo "Missing: skills/$skill/SKILL.md"
+              exit 1
+            fi
+            echo "✓ skills/$skill/SKILL.md"
+          done
+
+      - name: Check command files exist
+        run: |
+          for cmd in deploy deploy-preview deploy-production deploy-rollback deploy-status deploy-ui; do
+            if [ ! -f "commands/$cmd.md" ]; then
+              echo "Missing: commands/$cmd.md"
+              exit 1
+            fi
+            echo "✓ commands/$cmd.md"
+          done
+
+      - name: Validate UI
+        run: |
+          if [ ! -f "ui/index.html" ]; then echo "Missing ui/index.html"; exit 1; fi
+          grep -q "tailwindcss" ui/index.html && echo "✓ Tailwind CDN present"
+          grep -q "toggleTheme" ui/index.html && echo "✓ Dark/light toggle present"
+          echo "✓ ui/index.html valid"
