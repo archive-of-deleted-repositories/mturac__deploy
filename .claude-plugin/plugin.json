@@ -18,6 +18,7 @@
     "commands/deploy-preview.md",
     "commands/deploy-production.md",
     "commands/deploy-rollback.md",
-    "commands/deploy-status.md"
+    "commands/deploy-status.md",
+    "commands/deploy-ui.md"
   ]
 }
